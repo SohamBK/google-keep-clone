@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { Request, Response } from "express";
-import logger from "../../../common/utils/logger";
-import { sendSuccess, sendError } from "../../../common/utils/responseHandler";
+import logger from "../../common/utils/logger";
+import { sendSuccess, sendError } from "../../common/utils/responseHandler";
 
 export const health = async (req: Request, res: Response) => {
   const isDatabaseConnected = mongoose.connection.readyState === 1;

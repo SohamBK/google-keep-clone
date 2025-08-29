@@ -2,11 +2,11 @@
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import mainRouter from "./routes/routes"; // Corrected: Points to src/routes/routes.ts
+import mainRouter from "./routes/routes";
 import swaggerUi from "swagger-ui-express";
-import swaggerDocument from "./common/swagger/openapi.json"; // Path relative to backend root
-import requestLogger from "./common/middleware/requestLogger"; // Corrected path
-
+import cookieParser from "cookie-parser";
+import swaggerDocument from "./common/swagger/openapi.json";
+import requestLogger from "./common/middleware/requestLogger";
 dotenv.config();
 
 const app = express();
@@ -16,6 +16,7 @@ const MONGO_URI = process.env.MONGO_URI;
 // Middleware
 app.use(express.json());
 app.use(requestLogger);
+app.use(cookieParser());
 
 // Mount the main API router under /api/v1 prefix
 app.use("/api/v1", mainRouter);
