@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import User from "../../models/user.model";
 import { sendSuccess, sendError } from "src/common/utils/responseHandler";
 import logger from "src/common/utils/logger";
-import { generateAndSetTokens } from "src/Helper/auth.helper";
+import { generateAndSetTokens } from "src/helper/auth.helper";
 // controller for user registration
 export const register = async (req: Request, res: Response) => {
   try {

@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { sendError } from "../common/utils/responseHandler";
 import logger from "../common/utils/logger";
-import { generateAndSetTokens } from "../Helper/auth.helper";
+import { generateAndSetTokens } from "../helper/auth.helper";
 import User, { IUser } from "../models/user.model";
 
 // Extend the Request object to add a 'user' property
