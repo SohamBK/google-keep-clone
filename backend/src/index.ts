@@ -7,16 +7,31 @@ import swaggerUi from "swagger-ui-express";
 import cookieParser from "cookie-parser";
 import swaggerDocument from "./common/swagger/openapi.json";
 import requestLogger from "./common/middleware/requestLogger";
+import cors from "cors";
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
+const allowedOrigins = ["http://localhost:5173", "http://127.0.0.1:5173"];
 
 // Middleware
 app.use(express.json());
 app.use(requestLogger);
 app.use(cookieParser());
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 
 // Mount the main API router under /api/v1 prefix
 app.use("/api/v1", mainRouter);
