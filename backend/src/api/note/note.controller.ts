@@ -34,6 +34,7 @@ export const createNote = async (req: Request, res: Response) => {
   }
 };
 
+// get all notes
 export const getAllNotes = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
@@ -104,5 +105,50 @@ export const getNoteById = async (req: Request, res: Response) => {
       return sendError(res, "Invalid note ID format.", 400);
     }
     return sendError(res, "Failed to get note.", 500);
+  }
+};
+
+//update notes
+export const updateNote = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      logger.error("User ID not found, This is a protected route.");
+      return sendError(
+        res,
+        "User must be authenticated to access this route",
+        401
+      );
+    }
+
+    const noteId = req.params.id;
+    // Best Practice: Validate ID format to avoid database errors
+    if (!mongoose.Types.ObjectId.isValid(noteId)) {
+      logger.error(`Invalid note ID format: ${noteId}`);
+      return sendError(res, "Invalid note ID.", 400);
+    }
+
+    const updatedNote = await Note.findOneAndUpdate(
+      { _id: noteId, owner: userId },
+      req.body,
+      { new: true, runValidators: true }
+    ).lean();
+
+    if (!updatedNote) {
+      logger.error(`Note with ID ${noteId} not found for user ${userId}.`);
+      return sendError(res, "Note not found.", 404);
+    }
+
+    logger.info(`Note with ID ${updatedNote._id} updated successfully.`);
+    return sendSuccess(res, "Note updated successfully.", updatedNote, 200);
+  } catch (error: any) {
+    logger.error(
+      `Error during note update: ${error.message}\nStack: ${error.stack}`
+    );
+    // Best practice: Check for CastError, which can be caused by a bad ID
+    if (error.name === "CastError") {
+      return sendError(res, "Invalid note ID format.", 400);
+    }
+    return sendError(res, "Failed to update note.", 500);
   }
 };
