@@ -17,14 +17,25 @@ export const paginationSchema = Joi.object({
 });
 
 export const updateNoteSchema = Joi.object({
-  title: Joi.string().optional().messages({
-    "string.empty": "Title cannot be empty.",
+  title: Joi.string().min(1).optional().messages({
+    "string.min": "Title must be at least 1 character long.",
   }),
-  content: Joi.string().optional().messages({
-    "string.min": "Content must be at least 6 characters long.",
+  content: Joi.string().min(6).optional().messages({
+    "string.min": "Content must be at least 6 character long.",
   }),
+});
+
+export const updateStatusSchema = Joi.object({
+  isPinned: Joi.boolean().optional(),
+  isArchived: Joi.boolean().optional(),
+});
+
+export const tagsSchema = Joi.object({
+  tags: Joi.array().items(Joi.string().min(1)).min(1).required(),
 });
 
 export const validateCreateNote = validate(createNoteSchema);
 export const validatePagination = validate(paginationSchema);
 export const validateUpdateNote = validate(updateNoteSchema);
+export const validateUpdateStatus = validate(updateStatusSchema);
+export const validateTags = validate(tagsSchema);
