@@ -59,6 +59,7 @@ const noteSchema = new Schema<INote>(
     },
     collaborators: [
       {
+        _id: false,
         userId: {
           type: Schema.Types.ObjectId,
           ref: "User",

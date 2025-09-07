@@ -7,6 +7,7 @@ import swaggerUi from "swagger-ui-express";
 import cookieParser from "cookie-parser";
 import swaggerDocument from "./common/swagger/openapi.json";
 import requestLogger from "./common/middleware/requestLogger";
+import startPurgeDeletedNotesJob from "./cron/purgeDeletedNotes.cron";
 import cors from "cors";
 dotenv.config();
 
@@ -57,6 +58,9 @@ const startServer = () => {
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });
+
+  // Start the cron job to purge deleted notes
+  startPurgeDeletedNotesJob();
 };
 
 const main = async () => {

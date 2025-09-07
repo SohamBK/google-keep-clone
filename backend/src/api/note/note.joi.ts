@@ -31,7 +31,55 @@ export const updateStatusSchema = Joi.object({
 });
 
 export const tagsSchema = Joi.object({
-  tags: Joi.array().items(Joi.string().min(1)).min(1).required(),
+  tags: Joi.array().items(Joi.string().min(1)).min(1).required().messages({
+    "array.base": "Tags must be an array of strings.",
+    "array.min": "At least one tag is required.",
+  }),
+})
+  .required()
+  .messages({
+    "any.required": "Tags field is required.",
+  });
+
+export const colaboratoresSchema = Joi.object({
+  collaborators: Joi.array()
+    .items(
+      Joi.object({
+        email: Joi.string().email().required().messages({
+          "string.email": "Each collaborator must have a valid email address.",
+          "any.required": "Email is required for each collaborator.",
+        }),
+        permission: Joi.string()
+          .valid("read", "write")
+          .default("read")
+          .messages({
+            "any.only": "Permission must be either 'read' or 'write'.",
+          }),
+      })
+    )
+    .min(1)
+    .required()
+    .messages({
+      "array.base": "Collaborators must be an array of objects.",
+      "array.min": "At least one collaborator is required.",
+    }),
+})
+  .required()
+  .messages({
+    "any.required": "Collaborators field is required.",
+  });
+
+export const removeCollaboratorsSchema = Joi.object({
+  collaborators: Joi.array()
+    .items(Joi.string().email().required())
+    .min(1)
+    .required()
+    .messages({
+      "array.base": "Collaborators must be an array of email strings.",
+      "array.min": "At least one collaborator email is required.",
+      "string.email": "Each collaborator must be a valid email address.",
+      "any.required": "Collaborators field is required.",
+    }),
 });
 
 export const validateCreateNote = validate(createNoteSchema);
@@ -39,3 +87,5 @@ export const validatePagination = validate(paginationSchema);
 export const validateUpdateNote = validate(updateNoteSchema);
 export const validateUpdateStatus = validate(updateStatusSchema);
 export const validateTags = validate(tagsSchema);
+export const validateCollaborators = validate(colaboratoresSchema);
+export const validateRemoveCollaborators = validate(removeCollaboratorsSchema);
