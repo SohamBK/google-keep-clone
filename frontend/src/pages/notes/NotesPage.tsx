@@ -1,23 +1,44 @@
-import React from "react";
-import { useAppSelector } from "../../hooks/reduxHooks";
-import { selectAuth } from "../../store/auth/authSlice";
+import { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "../../hooks/reduxHooks";
+import { fetchAllNotes, selectNotes } from "../../store/notes/notesSlice";
+import NoteItem from "../../components/notes/NoteItem";
 
 const NotesPage: React.FC = () => {
-  const { user } = useAppSelector(selectAuth);
+  const dispatch = useAppDispatch();
+  const { notes, isLoading, error } = useAppSelector(selectNotes);
 
-  if (!user) {
-    // This case should ideally be handled by the router,
-    // but it's a good practice to have a fallback.
+  useEffect(() => {
+    dispatch(fetchAllNotes({ page: 1, limit: 10 }));
+  }, [dispatch]);
+
+  if (isLoading) {
     return (
-      <p className="text-red-500">You must be logged in to view this page.</p>
+      <div className="flex items-center justify-center min-h-screen">
+        <h1 className="text-2xl font-semibold">Loading notes...</h1>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <h1 className="text-2xl font-semibold text-red-500">{error}</h1>
+      </div>
     );
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <h1 className="text-4xl font-bold text-gray-800">
-        Welcome, {user.email}!
-      </h1>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-6">My Notes</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {notes.length > 0 ? (
+          notes.map((note) => <NoteItem key={note._id} note={note} />)
+        ) : (
+          <p className="text-gray-500">
+            No notes found. Create your first note!
+          </p>
+        )}
+      </div>
     </div>
   );
 };

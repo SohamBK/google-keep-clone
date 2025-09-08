@@ -49,13 +49,14 @@ export const fetchAllNotes = createAsyncThunk<
   async ({ page = 1, limit = 10 }, { getState, rejectWithValue }) => {
     try {
       const { auth } = getState() as RootState;
+      console.log("Access Token:", auth.accessToken);
       if (!auth.accessToken) {
-        return rejectWithValue("No access token found.");
+        return rejectWithValue("User must be logged in to fetch notes.");
       }
 
-      const response = await axios.get(`${API_BASE_URL}/notes`, {
+      const response = await axios.get(`${API_BASE_URL}/note/`, {
         headers: {
-          Authorization: `Bearer ${auth.accessToken}}`,
+          Authorization: `Bearer ${auth.accessToken}`,
         },
         params: { page, limit },
       });
