@@ -1,7 +1,8 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../hooks/reduxHooks";
 import { fetchAllNotes, selectNotes } from "../../store/notes/notesSlice";
 import NoteItem from "../../components/notes/NoteItem";
+import CreateNoteForm from "../../components/notes/CreateNoteForm"; // Import the form
 
 const NotesPage: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -30,6 +31,7 @@ const NotesPage: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">My Notes</h1>
+      <CreateNoteForm /> {/* Render the new form component here */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {notes.length > 0 ? (
           notes.map((note) => <NoteItem key={note._id} note={note} />)

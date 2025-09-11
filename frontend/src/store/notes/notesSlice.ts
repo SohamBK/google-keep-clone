@@ -49,12 +49,11 @@ export const fetchAllNotes = createAsyncThunk<
   async ({ page = 1, limit = 10 }, { getState, rejectWithValue }) => {
     try {
       const { auth } = getState() as RootState;
-      console.log("Access Token:", auth.accessToken);
       if (!auth.accessToken) {
-        return rejectWithValue("User must be logged in to fetch notes.");
+        return rejectWithValue("No access token found.");
       }
 
-      const response = await axios.get(`${API_BASE_URL}/note/`, {
+      const response = await axios.get(`${API_BASE_URL}/note`, {
         headers: {
           Authorization: `Bearer ${auth.accessToken}`,
         },
@@ -64,6 +63,38 @@ export const fetchAllNotes = createAsyncThunk<
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to fetch notes."
+      );
+    }
+  }
+);
+
+// Async thunk to create a new note
+export const createNote = createAsyncThunk<
+  Note,
+  { title: string; content?: string }
+>(
+  "notes/createNote",
+  async ({ title, content }, { getState, rejectWithValue }) => {
+    try {
+      const { auth } = getState() as RootState;
+      if (!auth.accessToken) {
+        return rejectWithValue("No access token found.");
+      }
+
+      const response = await axios.post(
+        `${API_BASE_URL}/note`,
+        { title, content },
+        {
+          headers: {
+            Authorization: `Bearer ${auth.accessToken}`,
+          },
+        }
+      );
+      // The backend returns the newly created note, which we return here
+      return response.data.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to create note."
       );
     }
   }
@@ -90,6 +121,19 @@ const notesSlice = createSlice({
         }
       )
       .addCase(fetchAllNotes.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      // Create new note lifecycle
+      .addCase(createNote.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(createNote.fulfilled, (state, action: PayloadAction<Note>) => {
+        state.isLoading = false;
+        state.notes.unshift(action.payload); // Add the new note to the top of the list
+      })
+      .addCase(createNote.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       });
