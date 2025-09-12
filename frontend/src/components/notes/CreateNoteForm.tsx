@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useAppDispatch, useAppSelector } from "../../hooks/reduxHooks";
-import { createNote, selectNotes } from "../../store/notes/notesSlice";
+import { useAppSelector } from "../../hooks/reduxHooks";
+import { selectNotes } from "../../store/notes/notesSlice";
 
 // Define the validation schema for the create note form
 const createNoteFormSchema = z.object({
@@ -15,10 +15,17 @@ const createNoteFormSchema = z.object({
 });
 
 // Infer the type from the schema for type-safe form data
-type CreateNoteFormInputs = z.infer<typeof createNoteFormSchema>;
+export type CreateNoteFormInputs = z.infer<typeof createNoteFormSchema>;
 
-const CreateNoteForm: React.FC = () => {
-  const dispatch = useAppDispatch();
+interface CreateNoteFormProps {
+  onFormSubmit: SubmitHandler<CreateNoteFormInputs>;
+  onClose: () => void;
+}
+
+const CreateNoteForm: React.FC<CreateNoteFormProps> = ({
+  onFormSubmit,
+  onClose,
+}) => {
   const { isLoading } = useAppSelector(selectNotes);
 
   const {
@@ -30,25 +37,39 @@ const CreateNoteForm: React.FC = () => {
     resolver: zodResolver(createNoteFormSchema),
   });
 
-  const onSubmit: SubmitHandler<CreateNoteFormInputs> = async (data) => {
-    try {
-      await dispatch(createNote(data)).unwrap();
-      reset(); // Clear the form on successful submission
-    } catch (error) {
-      // Error handling is managed by the Redux slice
-      console.error("Failed to create note:", error);
+  useEffect(() => {
+    if (!isLoading) {
+      reset(); // Clear the form on successful submission or when modal closes
     }
-  };
+  }, [isLoading, reset]);
 
   return (
-    <div className="max-w-md mx-auto mb-8 p-4 rounded-lg shadow-lg bg-white">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <div className="p-4 rounded-lg shadow-lg bg-white">
+      <div className="flex justify-end">
+        <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      </div>
+      <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
         <div>
           <input
             {...register("title")}
             type="text"
             placeholder="Title"
-            className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${
+            className={`w-full p-2 text-black border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${
               errors.title ? "border-red-500" : "border-gray-300"
             }`}
           />
@@ -61,7 +82,7 @@ const CreateNoteForm: React.FC = () => {
             {...register("content")}
             placeholder="Take a note..."
             rows={4}
-            className={`w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${
+            className={`w-full p-2 border rounded-md focus:outline-none text-black focus:ring-2 focus:ring-blue-500 transition-colors duration-200 ${
               errors.content ? "border-red-500" : "border-gray-300"
             }`}
           />
