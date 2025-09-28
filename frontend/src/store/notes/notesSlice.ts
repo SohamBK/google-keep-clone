@@ -32,12 +32,14 @@ interface NotesState {
   notes: Note[];
   isLoading: boolean;
   error: string | null;
+  selectedNote: Note | null;
 }
 
 const initialState: NotesState = {
   notes: [],
   isLoading: false,
   error: null,
+  selectedNote: null,
 };
 
 // Async thunk to fetch all notes for the main view
@@ -131,11 +133,45 @@ export const updateNoteStatus = createAsyncThunk<
   }
 );
 
+export const fetchNoteById = createAsyncThunk<Note, string>(
+  "notes/fetchNoteById",
+  async (fetchNoteById, { getState, rejectWithValue }) => {
+    try {
+      const { auth } = getState() as RootState;
+      if (!auth.accessToken) {
+        return rejectWithValue("No access token found.");
+      }
+
+      const response = await axios.get(
+        `${API_BASE_URL}/note/${fetchNoteById}`,
+        {
+          headers: {
+            Authorization: `Bearer ${auth.accessToken}`,
+          },
+        }
+      );
+      return response.data.data;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch the note."
+      );
+    }
+  }
+);
+
 const notesSlice = createSlice({
   name: "notes",
   initialState,
   reducers: {
-    // Add any synchronous reducers here if needed
+    // A reducer to manually set the selected note
+    setSelectedNote: (state, action: PayloadAction<Note | null>) => {
+      state.selectedNote = action.payload;
+    },
+    // A reducer to find a note by id from the current state
+    findAndSetSelectedNote: (state, action: PayloadAction<string>) => {
+      state.selectedNote =
+        state.notes.find((note) => note._id === action.payload) || null;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -190,9 +226,27 @@ const notesSlice = createSlice({
       .addCase(updateNoteStatus.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
+      })
+
+      // Fetch single note by ID lifecycle
+      .addCase(fetchNoteById.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(
+        fetchNoteById.fulfilled,
+        (state, action: PayloadAction<Note>) => {
+          state.isLoading = false;
+          state.selectedNote = action.payload; // Store the fetched note in state
+        }
+      )
+      .addCase(fetchNoteById.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
       });
   },
 });
 
+export const { setSelectedNote, findAndSetSelectedNote } = notesSlice.actions;
 export const selectNotes = (state: RootState) => state.notes;
 export default notesSlice.reducer;
