@@ -78,8 +78,10 @@ const NoteDetailModal: React.FC<NoteDetailModalProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={handleClose}>
       <div className="p-6">
-        <h2 className="text-2xl font-bold mb-4">{selectedNote.title}</h2>
-        <p>{selectedNote.content}</p>
+        <h2 className="text-2xl font-bold mb-4 text-black">
+          {selectedNote.title}
+        </h2>
+        <p className="text-black">{selectedNote.content}</p>
       </div>
     </Modal>
   );
