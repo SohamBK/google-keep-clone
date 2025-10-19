@@ -9,6 +9,9 @@ import swaggerDocument from "./common/swagger/openapi.json";
 import requestLogger from "./common/middleware/requestLogger";
 import startPurgeDeletedNotesJob from "./cron/purgeDeletedNotes.cron";
 import cors from "cors";
+import passport from "passport";
+import googleAuthRouter from "../src/api/auth/google.routes";
+
 dotenv.config();
 
 const app = express();
@@ -20,6 +23,9 @@ const allowedOrigins = ["http://localhost:5173", "http://127.0.0.1:5173"];
 app.use(express.json());
 app.use(requestLogger);
 app.use(cookieParser());
+
+// Initialize passport
+app.use(passport.initialize());
 
 app.use(
   cors({
@@ -36,6 +42,9 @@ app.use(
 
 // Mount the main API router under /api/v1 prefix
 app.use("/api/v1", mainRouter);
+
+// Mount Google Auth routes
+app.use("/api/v1/google-auth", googleAuthRouter);
 
 // Swagger Documentation
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
