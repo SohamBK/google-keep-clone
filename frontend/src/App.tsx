@@ -1,11 +1,14 @@
 import React from "react";
+import AppRoutes from "./routes/AppRoutes";
+import Navbar from "./components/Navbar";
 
-function App() {
+const App: React.FC = () => {
   return (
-    <div>
-      <h1>Hello React + Typescript _ Vite</h1>
-    </div>
+    <>
+      <Navbar />
+      <AppRoutes />
+    </>
   );
-}
+};
 
 export default App;
