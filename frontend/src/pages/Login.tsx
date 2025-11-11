@@ -1,73 +1,140 @@
-import React, { useState } from "react";
+import React from "react";
+import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+import {
+  loginStart,
+  loginSuccess,
+  loginFailure,
+} from "../features/auth/authSlice";
+
+interface LoginFormInputs {
+  email: string;
+  password: string;
+}
 
 const Login: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const dispatch = useAppDispatch();
+  const { isLoading, error } = useAppSelector((state) => state.auth);
 
-  const handelSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log(`name: ${email} and password: ${password} `);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormInputs>();
+
+  // We’ll replace this dummy handler with API call later
+  const onSubmit = async (data: LoginFormInputs) => {
+    try {
+      dispatch(loginStart());
+      console.log("Form data:", data);
+
+      // Simulate success (we'll add real API next step)
+      setTimeout(() => {
+        dispatch(
+          loginSuccess({
+            userId: "dummy-user-id",
+            email: data.email,
+            accessToken: "dummy-access-token",
+          })
+        );
+      }, 1000);
+    } catch (err: any) {
+      dispatch(loginFailure("Login failed."));
+    }
   };
 
   return (
-    <main className="flex items-center justify-center min-h-[calc(100vh-64px)] bg-gradient-to-br from-yellow-50 to-white">
-      <section className="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl">
-        <h2 className="text-2xl text-center font-semibold text-gray-800 mb-6">
-          {" "}
+    <main className="flex items-center justify-center min-h-[calc(100vh-64px)] bg-gray-50">
+      <section className="w-full max-w-md bg-white p-8 rounded-2xl shadow-md">
+        <h2 className="text-2xl font-semibold text-center text-gray-800 mb-6">
           Login to Your Account
         </h2>
 
-        <form className="space-y-4" onSubmit={handelSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Email */}
           <div>
             <label
-              className="block text-sm font-medium text-gray-700 mb-1"
               htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Email Address:
+              Email Address
             </label>
             <input
               type="email"
               id="email"
               placeholder="you@example.com"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-              }}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              {...register("email", {
+                required: "Email is required",
+                pattern: {
+                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                  message: "Invalid email format",
+                },
+              })}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                errors.email
+                  ? "border-red-400 focus:ring-red-400"
+                  : "border-gray-300 focus:ring-amber-400"
+              }`}
             />
+            {errors.email && (
+              <p className="text-sm text-red-500 mt-1">
+                {errors.email.message}
+              </p>
+            )}
           </div>
+
+          {/* Password */}
           <div>
             <label
-              className="block text-sm font-medium text-gray-700 mb-1"
               htmlFor="password"
+              className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Password:
+              Password
             </label>
             <input
               type="password"
               id="password"
-              placeholder="******"
-              required
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-              }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              placeholder="••••••••"
+              {...register("password", {
+                required: "Password is required",
+                minLength: {
+                  value: 6,
+                  message: "Password must be at least 6 characters",
+                },
+              })}
+              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                errors.password
+                  ? "border-red-400 focus:ring-red-400"
+                  : "border-gray-300 focus:ring-amber-400"
+              }`}
             />
+            {errors.password && (
+              <p className="text-sm text-red-500 mt-1">
+                {errors.password.message}
+              </p>
+            )}
           </div>
+
+          {/* Submit Button */}
           <button
             type="submit"
-            className="w-full py-2.5 bg-yellow-500 text-white font-medium rounded-lg hover:bg-yellow-600 transition-colors duration-200"
+            disabled={isLoading}
+            className="w-full py-2.5 bg-amber-500 text-white font-medium rounded-lg hover:bg-amber-600 disabled:opacity-70 transition-colors duration-200"
           >
-            Login
+            {isLoading ? "Logging in..." : "Login"}
           </button>
+
+          {/* Error message */}
+          {error && (
+            <p className="text-center text-red-500 text-sm mt-2">{error}</p>
+          )}
         </form>
 
+        {/* Footer */}
         <p className="text-center text-sm text-gray-600 mt-6">
-          Don't have an account?{" "}
-          <Link className="text-yellow-600 hover:underline" to="/register">
+          Don’t have an account?{" "}
+          <Link to="/register" className="text-amber-600 hover:underline">
             Register
           </Link>
         </p>
