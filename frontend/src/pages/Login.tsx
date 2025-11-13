@@ -2,11 +2,8 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
-import {
-  loginStart,
-  loginSuccess,
-  loginFailure,
-} from "../features/auth/authSlice";
+import { loginUser } from "../features/auth/authThunks";
+import { useNavigate } from "react-router-dom";
 
 interface LoginFormInputs {
   email: string;
@@ -14,6 +11,7 @@ interface LoginFormInputs {
 }
 
 const Login: React.FC = () => {
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { isLoading, error } = useAppSelector((state) => state.auth);
 
@@ -23,25 +21,13 @@ const Login: React.FC = () => {
     formState: { errors },
   } = useForm<LoginFormInputs>();
 
-  // We’ll replace this dummy handler with API call later
   const onSubmit = async (data: LoginFormInputs) => {
-    try {
-      dispatch(loginStart());
-      console.log("Form data:", data);
-
-      // Simulate success (we'll add real API next step)
-      setTimeout(() => {
-        dispatch(
-          loginSuccess({
-            userId: "dummy-user-id",
-            email: data.email,
-            accessToken: "dummy-access-token",
-          })
-        );
-      }, 1000);
-    } catch (err: any) {
-      dispatch(loginFailure("Login failed."));
-    }
+    dispatch(loginUser(data))
+      .unwrap()
+      .then(() => {
+        navigate("/dashboard");
+      })
+      .catch(() => {});
   };
 
   return (
