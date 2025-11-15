@@ -5,6 +5,7 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import NotFound from "../pages/NotFound";
 import Dashboard from "../pages/Dashboard";
+import Archive from "../pages/Archive";
 import RequireAuth from "../components/RequireAuth";
 
 const AppRoutes: React.FC = () => {
@@ -21,6 +22,14 @@ const AppRoutes: React.FC = () => {
         element={
           <RequireAuth>
             <Dashboard />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/archive"
+        element={
+          <RequireAuth>
+            <Archive />
           </RequireAuth>
         }
       />

@@ -57,8 +57,16 @@ const getNotesWithFilter = async (
 
     const query = { owner: userId, ...filter };
 
-    const notes = await Note.find(query).skip(skip).limit(limit).lean();
+    const notes = await Note.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
     const totalNotes = await Note.countDocuments(query);
+
+    const totalPages = Math.ceil(totalNotes / limit);
+    const hasNextPage = page < totalPages;
+    const hasPrevPage = page > 1;
 
     logger.info("Notes retrieved with pagination!");
     return sendSuccess(
@@ -69,6 +77,9 @@ const getNotesWithFilter = async (
         totalNotes,
         page,
         limit,
+        totalPages,
+        hasNextPage,
+        hasPrevPage,
       },
       200
     );

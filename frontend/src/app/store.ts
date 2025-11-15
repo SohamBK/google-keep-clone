@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "../features/auth/authSlice";
 import notesReducer from "../features/notes/notesSlice";
+import { setupInterceptors } from "../api/axiosClient";
 
 function loadAuthState() {
   try {
@@ -20,6 +21,8 @@ export const store = configureStore({
   preloadedState: loadAuthState(),
   devTools: true,
 });
+
+setupInterceptors(store);
 
 store.subscribe(() => {
   const state = store.getState().auth;

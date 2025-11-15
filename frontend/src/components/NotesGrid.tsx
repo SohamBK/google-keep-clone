@@ -1,14 +1,41 @@
 import React from "react";
 import { useAppSelector } from "../app/hooks";
 import NoteCard from "./NoteCard";
+import { type Note } from "../features/notes/types";
 
-const NotesGrid: React.FC = () => {
-  const notes = useAppSelector((state) => state.notes.items);
+interface NotesGridProps {
+  notes?: Note[];
+  showSections?: boolean;
+}
+
+const NotesGrid: React.FC<NotesGridProps> = ({
+  notes,
+  showSections = true,
+}) => {
+  const storeNotes = useAppSelector((state) => state.notes.items);
+
+  // If notes prop exists → use it
+  // If not → use store notes
+  const allNotes = notes ?? storeNotes;
 
   // Filter notes
-  const pinned = notes.filter((n) => n.isPinned && !n.isArchived);
-  const others = notes.filter((n) => !n.isPinned && !n.isArchived);
+  const pinned = allNotes.filter((n) => n.isPinned && !n.isArchived);
+  const others = allNotes.filter((n) => !n.isPinned && !n.isArchived);
 
+  // ARCHIVE PAGE: no sections
+  if (!showSections) {
+    return (
+      <div className="max-w-6xl mx-auto mt-8 px-4 columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4">
+        {allNotes.map((note) => (
+          <div key={note._id} className="mb-4">
+            <NoteCard {...note} />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // DASHBOARD PAGE (default: show pinned + others)
   return (
     <div className="max-w-6xl mx-auto mt-8 px-4">
       {/* ------------------- PINNED NOTES ------------------- */}

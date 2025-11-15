@@ -24,6 +24,7 @@ const Navbar: React.FC = () => {
   const privateNavItems = [
     { path: "/", label: "Home" },
     { path: "/dashboard", label: "Dashboard" },
+    { path: "/archive", label: "Archive" },
   ];
 
   return (

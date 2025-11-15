@@ -1,74 +1,89 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
-import type { RootState } from "../../app/store";
+import { notesApi } from "./api/notesApi";
 
 interface CreateNotePayload {
   title?: string;
   content: string;
 }
 
+interface UpdateNoteStatusPayload {
+  noteId: string;
+  updates: {
+    isPinned?: boolean;
+    isArchived?: boolean;
+  };
+}
+
+interface FetchNotesParams {
+  page?: number;
+  limit?: number;
+}
+
 export const createNote = createAsyncThunk(
   "notes/createNote",
-  async (payload: CreateNotePayload, { getState, rejectWithValue }) => {
+  async (payload: CreateNotePayload, { rejectWithValue }) => {
     try {
-      const state = getState() as RootState;
-      const token = state.auth.accessToken;
-
-      const response = await axios.post(
-        "http://localhost:5000/api/v1/note/",
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
+      const res = await notesApi.createNote(payload);
+      return res.data.data;
+    } catch (err: any) {
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to create note"
       );
-
-      return response.data.data;
-    } catch (error: any) {
-      const message =
-        error.response?.data?.message ||
-        error.message ||
-        "Failed to create note";
-      return rejectWithValue(message);
     }
   }
 );
 
 export const updateNoteStatus = createAsyncThunk(
   "notes/updateNoteStatus",
-  async (
-    payload: {
-      noteId: string;
-      updates: { isPinned?: boolean; isArchived?: boolean };
-    },
-    { getState, rejectWithValue }
-  ) => {
+  async ({ noteId, updates }: UpdateNoteStatusPayload, { rejectWithValue }) => {
     try {
-      const state = getState() as RootState;
-      const token = state.auth.accessToken;
-
-      const response = await axios.patch(
-        `http://localhost:5000/api/v1/note/${payload.noteId}/status/`,
-        payload.updates,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          withCredentials: true,
-        }
+      const res = await notesApi.updateStatus(noteId, updates);
+      return res.data.data;
+    } catch (err: any) {
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to update note"
       );
+    }
+  }
+);
 
-      return response.data.data; // updated note object
-    } catch (error: any) {
-      const message =
-        error.response?.data?.message ||
-        error.message ||
-        "Failed to update note status";
-      return rejectWithValue(message);
+export const fetchNotes = createAsyncThunk(
+  "notes/fetchNotes",
+  async (params: FetchNotesParams | undefined, { rejectWithValue }) => {
+    try {
+      // completely safe extraction
+      const page = params && params.page ? params.page : 1;
+      const limit = params && params.limit ? params.limit : 20;
+
+      const res = await notesApi.fetchNotes(page, limit);
+
+      const { notes, totalPages, hasNextPage } = res.data.data;
+
+      return { notes, page, totalPages, hasNextPage };
+    } catch (err: any) {
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to fetch notes"
+      );
+    }
+  }
+);
+
+export const fetchArchivedNotes = createAsyncThunk(
+  "notes/fetchArchivedNotes",
+  async (params: FetchNotesParams | undefined, { rejectWithValue }) => {
+    try {
+      const page = params?.page ?? 1;
+      const limit = params?.limit ?? 20;
+
+      const res = await notesApi.fetchArchived(page, limit);
+
+      const { notes, totalPages, hasNextPage } = res.data.data;
+
+      return { notes, page, totalPages, hasNextPage };
+    } catch (err: any) {
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to fetch archived notes"
+      );
     }
   }
 );
