@@ -87,3 +87,49 @@ export const fetchArchivedNotes = createAsyncThunk(
     }
   }
 );
+
+export const fetchTrashNotes = createAsyncThunk(
+  "notes/fetchTrashNotes",
+  async (params: FetchNotesParams | undefined, { rejectWithValue }) => {
+    try {
+      const page = params?.page ?? 1;
+      const limit = params?.limit ?? 20;
+
+      const res = await notesApi.fetchTrash(page, limit);
+
+      const { notes, totalPages, hasNextPage } = res.data.data;
+
+      return { notes, page, totalPages, hasNextPage };
+    } catch (err: any) {
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to fetch trash notes"
+      );
+    }
+  }
+);
+
+export const restoreNote = createAsyncThunk(
+  "notes/restoreNote",
+  async (noteId: string, { rejectWithValue }) => {
+    try {
+      const res = await notesApi.restoreNote(noteId);
+      return res.data.data; // return restored note
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || "Restore failed");
+    }
+  }
+);
+
+export const deleteNoteForever = createAsyncThunk(
+  "notes/deleteNoteForever",
+  async (noteId: string, { rejectWithValue }) => {
+    try {
+      await notesApi.deleteForever(noteId);
+      return noteId; // return ID so we can remove it from Redux
+    } catch (err: any) {
+      return rejectWithValue(
+        err.response?.data?.message || "Permanent delete failed"
+      );
+    }
+  }
+);

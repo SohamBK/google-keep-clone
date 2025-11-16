@@ -6,6 +6,7 @@ import Register from "../pages/Register";
 import NotFound from "../pages/NotFound";
 import Dashboard from "../pages/Dashboard";
 import Archive from "../pages/Archive";
+import Trash from "../pages/Trash";
 import RequireAuth from "../components/RequireAuth";
 
 const AppRoutes: React.FC = () => {
@@ -30,6 +31,15 @@ const AppRoutes: React.FC = () => {
         element={
           <RequireAuth>
             <Archive />
+          </RequireAuth>
+        }
+      />
+
+      <Route
+        path="/trash"
+        element={
+          <RequireAuth>
+            <Trash />
           </RequireAuth>
         }
       />

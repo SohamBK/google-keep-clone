@@ -11,4 +11,12 @@ export const notesApi = {
 
   fetchArchived: (page: number, limit: number) =>
     axiosClient.get(`/note/archived?page=${page}&limit=${limit}`),
+
+  fetchTrash: (page: number, limit: number) =>
+    axiosClient.get(`/note/trash?page=${page}&limit=${limit}`),
+
+  restoreNote: (id: string) => axiosClient.patch(`/note/${id}/restore`),
+
+  deleteForever: (id: string) =>
+    axiosClient.delete(`/note/${id}/permanent-delete`),
 };

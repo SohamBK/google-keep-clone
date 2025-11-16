@@ -6,11 +6,13 @@ import { type Note } from "../features/notes/types";
 interface NotesGridProps {
   notes?: Note[];
   showSections?: boolean;
+  mode?: "normal" | "archive" | "trash";
 }
 
 const NotesGrid: React.FC<NotesGridProps> = ({
   notes,
   showSections = true,
+  mode = "normal",
 }) => {
   const storeNotes = useAppSelector((state) => state.notes.items);
 
@@ -28,7 +30,7 @@ const NotesGrid: React.FC<NotesGridProps> = ({
       <div className="max-w-6xl mx-auto mt-8 px-4 columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4">
         {allNotes.map((note) => (
           <div key={note._id} className="mb-4">
-            <NoteCard {...note} />
+            <NoteCard {...note} mode={mode} />
           </div>
         ))}
       </div>

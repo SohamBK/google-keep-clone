@@ -4,6 +4,9 @@ import {
   updateNoteStatus,
   fetchNotes,
   fetchArchivedNotes,
+  fetchTrashNotes,
+  restoreNote,
+  deleteNoteForever,
 } from "./notesThunks";
 import toast from "react-hot-toast";
 import { type Note } from "./types";
@@ -15,9 +18,16 @@ interface NotesState {
   totalPages: number;
   hasNextPage: boolean;
 
+  // archived notes pagination
   archivePage: number;
   archiveTotalPages: number;
   archiveHasNextPage: boolean;
+
+  // trash page  and its pagination
+  trash: Note[];
+  trashPage: number;
+  trashTotalPages: number;
+  trashHasNextPage: boolean;
 
   isLoading: boolean;
   error: string | null;
@@ -34,6 +44,11 @@ const initialState: NotesState = {
   archivePage: 1,
   archiveTotalPages: 1,
   archiveHasNextPage: false,
+
+  trash: [],
+  trashPage: 1,
+  trashTotalPages: 1,
+  trashHasNextPage: false,
 
   isLoading: false,
   error: null,
@@ -130,6 +145,59 @@ const notesSlice = createSlice({
       .addCase(fetchArchivedNotes.rejected, (state, action: any) => {
         state.isLoading = false;
         state.error = action.payload;
+      })
+
+      // Trash page cases
+      .addCase(fetchTrashNotes.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchTrashNotes.fulfilled, (state, action) => {
+        state.isLoading = false;
+
+        const { notes, page, totalPages, hasNextPage } = action.payload;
+
+        if (page === 1) {
+          state.trash = notes;
+        } else {
+          state.trash = [...state.trash, ...notes];
+        }
+
+        state.trashPage = page;
+        state.trashTotalPages = totalPages;
+        state.trashHasNextPage = hasNextPage;
+      })
+      .addCase(fetchTrashNotes.rejected, (state, action: any) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+
+      // Restore Note from Trash
+      .addCase(restoreNote.fulfilled, (state, action) => {
+        const restored = action.payload;
+
+        // Remove from trash
+        state.trash = state.trash.filter((n) => n._id !== restored._id);
+
+        // Add back into items list
+        state.items.unshift(restored);
+
+        toast.success("Note restored!");
+      })
+      .addCase(restoreNote.rejected, (state, action: any) => {
+        toast.error(action.payload || "Failed to restore note");
+      })
+      // Delete Note Forever
+      .addCase(deleteNoteForever.fulfilled, (state, action) => {
+        const id = action.payload;
+
+        // Remove from trash only
+        state.trash = state.trash.filter((n) => n._id !== id);
+
+        toast.success("Note permanently deleted");
+      })
+      .addCase(deleteNoteForever.rejected, (state, action: any) => {
+        toast.error(action.payload || "Failed to delete note");
       });
   },
 });
