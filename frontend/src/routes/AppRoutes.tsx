@@ -8,6 +8,7 @@ import Dashboard from "../pages/Dashboard";
 import Archive from "../pages/Archive";
 import Trash from "../pages/Trash";
 import RequireAuth from "../components/RequireAuth";
+import AppLayout from "../layouts/AppLayout";
 
 const AppRoutes: React.FC = () => {
   return (
@@ -22,7 +23,9 @@ const AppRoutes: React.FC = () => {
         path="/dashboard"
         element={
           <RequireAuth>
-            <Dashboard />
+            <AppLayout>
+              <Dashboard />
+            </AppLayout>
           </RequireAuth>
         }
       />
@@ -30,7 +33,9 @@ const AppRoutes: React.FC = () => {
         path="/archive"
         element={
           <RequireAuth>
-            <Archive />
+            <AppLayout>
+              <Archive />
+            </AppLayout>
           </RequireAuth>
         }
       />
@@ -39,7 +44,9 @@ const AppRoutes: React.FC = () => {
         path="/trash"
         element={
           <RequireAuth>
-            <Trash />
+            <AppLayout>
+              <Trash />
+            </AppLayout>
           </RequireAuth>
         }
       />

@@ -82,8 +82,12 @@ const NoteCard: React.FC<Props> = ({
       )}
 
       {/* ------------------- CONTENT ------------------- */}
-      {content && (
-        <p className="text-gray-700 whitespace-pre-wrap">{content}</p>
+      {content ? (
+        <p className="text-gray-700 whitespace-pre-wrap">
+          {content.length > 30 ? `${content.slice(0, 30)}...` : content}
+        </p>
+      ) : (
+        <p className="text-gray-500">No content available</p>
       )}
 
       {/* ------------------- ACTIONS ------------------- */}
