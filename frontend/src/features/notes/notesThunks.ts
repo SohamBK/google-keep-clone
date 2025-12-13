@@ -47,23 +47,32 @@ export const updateNoteStatus = createAsyncThunk(
   }
 );
 
+export const fetchPinnedNotes = createAsyncThunk(
+  "notes/fetchPinnedNotes",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await notesApi.fetchPinned();
+      return res.data.data.notes;
+    } catch (err: any) {
+      return rejectWithValue("Failed to fetch pinned notes");
+    }
+  }
+);
+
 export const fetchNotes = createAsyncThunk(
   "notes/fetchNotes",
   async (params: FetchNotesParams | undefined, { rejectWithValue }) => {
     try {
-      // completely safe extraction
-      const page = params && params.page ? params.page : 1;
-      const limit = params && params.limit ? params.limit : 20;
+      const page = params?.page ?? 1;
+      const limit = params?.limit ?? 10;
 
       const res = await notesApi.fetchNotes(page, limit);
 
-      const { notes, totalPages, hasNextPage } = res.data.data;
+      const { notes, hasNextPage } = res.data.data;
 
-      return { notes, page, totalPages, hasNextPage };
+      return { notes, page, hasNextPage };
     } catch (err: any) {
-      return rejectWithValue(
-        err.response?.data?.message || "Failed to fetch notes"
-      );
+      return rejectWithValue("Failed to fetch notes");
     }
   }
 );

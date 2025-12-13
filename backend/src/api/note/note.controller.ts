@@ -42,7 +42,8 @@ export const createNote = async (req: Request, res: Response) => {
 const getNotesWithFilter = async (
   req: Request,
   res: Response,
-  filter: object
+  filter: object,
+  paginate: boolean = true // Add a flag to control pagination
 ) => {
   try {
     const userId = req.user?.id;
@@ -51,35 +52,46 @@ const getNotesWithFilter = async (
       return sendError(res, "User must be authenticated to view notes", 401);
     }
 
-    const page = parseInt(req.query.page as string, 10) || 1;
-    const limit = parseInt(req.query.limit as string, 10) || 10;
+    // Pagination logic (only applies when paginate is true)
+    const page = paginate ? parseInt(req.query.page as string, 10) || 1 : 1;
+    const limit = paginate ? parseInt(req.query.limit as string, 10) || 10 : 0;
     const skip = (page - 1) * limit;
 
     const query = { owner: userId, ...filter };
 
-    const notes = await Note.find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean();
+    let notesQuery = Note.find(query).sort({ createdAt: -1 }).lean();
+    if (paginate) {
+      notesQuery = notesQuery.skip(skip).limit(limit);
+    }
+
+    const notes = await notesQuery;
     const totalNotes = await Note.countDocuments(query);
 
-    const totalPages = Math.ceil(totalNotes / limit);
-    const hasNextPage = page < totalPages;
-    const hasPrevPage = page > 1;
+    // Pagination metadata, only included when paginate is true
+    let paginationMetadata = {};
+    if (paginate) {
+      const totalPages = Math.ceil(totalNotes / limit);
+      const hasNextPage = page < totalPages;
+      const hasPrevPage = page > 1;
 
-    logger.info("Notes retrieved with pagination!");
-    return sendSuccess(
-      res,
-      "Notes retrieved successfully.",
-      {
-        notes,
+      paginationMetadata = {
         totalNotes,
         page,
         limit,
         totalPages,
         hasNextPage,
         hasPrevPage,
+      };
+    }
+
+    logger.info("Notes retrieved with pagination!");
+
+    return sendSuccess(
+      res,
+      "Notes retrieved successfully.",
+      {
+        notes,
+        ...paginationMetadata, // Include pagination metadata only if paginate is true
       },
       200
     );
@@ -91,18 +103,23 @@ const getNotesWithFilter = async (
   }
 };
 
-// api to retrieve all notes (main view)
+// API to retrieve all notes (main view), excluding pinned notes
 export const getAllNotes = (req: Request, res: Response) => {
-  return getNotesWithFilter(req, res, { isArchived: false, isDeleted: false });
-};
-
-// api to get pinned notes
-export const getAllPinnedNotes = (req: Request, res: Response) => {
   return getNotesWithFilter(req, res, {
-    isPinned: true,
     isArchived: false,
     isDeleted: false,
+    isPinned: false,
   });
+};
+
+// API to get all pinned notes without pagination
+export const getAllPinnedNotes = (req: Request, res: Response) => {
+  return getNotesWithFilter(
+    req,
+    res,
+    { isPinned: true, isArchived: false, isDeleted: false },
+    false
+  );
 };
 
 // api to get all archived notes

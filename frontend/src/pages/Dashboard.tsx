@@ -3,7 +3,7 @@ import { useAppSelector } from "../app/hooks";
 import NoteInput from "../components/NoteInput";
 import NotesGrid from "../components/NotesGrid";
 import { useAppDispatch } from "../app/hooks";
-import { fetchNotes } from "../features/notes/notesThunks";
+import { fetchNotes, fetchPinnedNotes } from "../features/notes/notesThunks";
 
 const Dashboard: React.FC = () => {
   const { hasNextPage, page } = useAppSelector((state) => state.notes);
@@ -11,7 +11,8 @@ const Dashboard: React.FC = () => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    dispatch(fetchNotes({ page: 1, limit: 5 }));
+    dispatch(fetchPinnedNotes()); // load once
+    dispatch(fetchNotes({ page: 1, limit: 10 }));
   }, [dispatch]);
 
   const loadMore = () => {

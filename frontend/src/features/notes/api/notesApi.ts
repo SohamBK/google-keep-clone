@@ -9,6 +9,8 @@ export const notesApi = {
   fetchNotes: (page: number, limit: number) =>
     axiosClient.get(`/note/?page=${page}&limit=${limit}`),
 
+  fetchPinned: () => axiosClient.get("/note/pinned"),
+
   fetchArchived: (page: number, limit: number) =>
     axiosClient.get(`/note/archived?page=${page}&limit=${limit}`),
 

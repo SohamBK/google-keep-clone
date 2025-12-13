@@ -7,11 +7,13 @@ import {
   fetchTrashNotes,
   restoreNote,
   deleteNoteForever,
+  fetchPinnedNotes,
 } from "./notesThunks";
 import toast from "react-hot-toast";
 import { type Note } from "./types";
 
 interface NotesState {
+  pinned: Note[];
   items: Note[]; // active notes
   archived: Note[]; // archived notes
   page: number;
@@ -34,6 +36,7 @@ interface NotesState {
 }
 
 const initialState: NotesState = {
+  pinned: [],
   items: [],
   archived: [],
 
@@ -81,16 +84,16 @@ const notesSlice = createSlice({
         state.error = null;
       })
       .addCase(updateNoteStatus.fulfilled, (state, action) => {
-        state.isLoading = false;
+        const updated = action.payload;
 
-        const updatedNote = action.payload;
-
-        // Replace updated note in state.items
-        state.items = state.items.map((note) =>
-          note._id === updatedNote._id ? updatedNote : note
-        );
-
-        toast.success("Note updated!");
+        // If pinned
+        if (updated.isPinned) {
+          state.items = state.items.filter((n) => n._id !== updated._id);
+          state.pinned.unshift(updated);
+        } else {
+          state.pinned = state.pinned.filter((n) => n._id !== updated._id);
+          state.items.unshift(updated);
+        }
       })
       .addCase(updateNoteStatus.rejected, (state, action: any) => {
         state.isLoading = false;
@@ -102,9 +105,11 @@ const notesSlice = createSlice({
         state.isLoading = true;
         state.error = null;
       })
+      .addCase(fetchPinnedNotes.fulfilled, (state, action) => {
+        state.pinned = action.payload;
+      })
       .addCase(fetchNotes.fulfilled, (state, action) => {
-        state.isLoading = false;
-        const { notes, page, totalPages, hasNextPage } = action.payload;
+        const { notes, page, hasNextPage } = action.payload;
 
         if (page === 1) {
           state.items = notes;
@@ -113,7 +118,6 @@ const notesSlice = createSlice({
         }
 
         state.page = page;
-        state.totalPages = totalPages;
         state.hasNextPage = hasNextPage;
       })
       .addCase(fetchNotes.rejected, (state, action: any) => {

@@ -21,8 +21,8 @@ const NotesGrid: React.FC<NotesGridProps> = ({
   const allNotes = notes ?? storeNotes;
 
   // Filter notes
-  const pinned = allNotes.filter((n) => n.isPinned && !n.isArchived);
-  const others = allNotes.filter((n) => !n.isPinned && !n.isArchived);
+  const pinned = useAppSelector((state) => state.notes.pinned);
+  const others = useAppSelector((state) => state.notes.items);
 
   // ARCHIVE PAGE: no sections
   if (!showSections) {
