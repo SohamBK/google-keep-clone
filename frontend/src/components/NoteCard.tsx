@@ -5,6 +5,7 @@ import {
   updateNoteStatus,
   deleteNoteForever,
   restoreNote,
+  softDeleteNote,
 } from "../features/notes/notesThunks";
 
 interface Props {
@@ -43,6 +44,10 @@ const NoteCard: React.FC<Props> = ({
         updates: { isArchived: !isArchived },
       })
     );
+  };
+
+  const handleSoftDelete = () => {
+    dispatch(softDeleteNote(_id)); // ✅ NEW
   };
 
   const handleRestore = () => {
@@ -84,7 +89,7 @@ const NoteCard: React.FC<Props> = ({
       {/* ------------------- CONTENT ------------------- */}
       {content ? (
         <p className="text-gray-700 whitespace-pre-wrap">
-          {content.length > 30 ? `${content.slice(0, 30)}...` : content}
+          {content.length > 25 ? `${content.slice(0, 25)}...` : content}
         </p>
       ) : (
         <p className="text-gray-500">No content available</p>
@@ -120,7 +125,10 @@ const NoteCard: React.FC<Props> = ({
             </button>
 
             {/* Move to Trash (Soft Delete) */}
-            <button className="text-gray-500 hover:text-red-500 transition">
+            <button
+              onClick={handleSoftDelete}
+              className="text-gray-500 hover:text-red-500"
+            >
               <MdDelete size={20} />
             </button>
           </>

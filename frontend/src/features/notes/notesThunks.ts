@@ -142,3 +142,17 @@ export const deleteNoteForever = createAsyncThunk(
     }
   }
 );
+
+export const softDeleteNote = createAsyncThunk(
+  "notes/softDeleteNote",
+  async (noteId: string, { rejectWithValue }) => {
+    try {
+      const res = await notesApi.softDelete(noteId);
+      return res.data.data; // deleted note object
+    } catch (err: any) {
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to move note to trash"
+      );
+    }
+  }
+);

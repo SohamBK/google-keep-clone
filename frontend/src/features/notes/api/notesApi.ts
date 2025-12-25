@@ -21,4 +21,6 @@ export const notesApi = {
 
   deleteForever: (id: string) =>
     axiosClient.delete(`/note/${id}/permanent-delete`),
+
+  softDelete: (id: string) => axiosClient.delete(`/note/${id}`),
 };

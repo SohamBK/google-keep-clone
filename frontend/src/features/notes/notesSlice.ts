@@ -8,6 +8,7 @@ import {
   restoreNote,
   deleteNoteForever,
   fetchPinnedNotes,
+  softDeleteNote,
 } from "./notesThunks";
 import toast from "react-hot-toast";
 import { type Note } from "./types";
@@ -180,11 +181,15 @@ const notesSlice = createSlice({
       .addCase(restoreNote.fulfilled, (state, action) => {
         const restored = action.payload;
 
-        // Remove from trash
-        state.trash = state.trash.filter((n) => n._id !== restored._id);
+        // 1️⃣ Remove from trash
+        state.trash = state.trash.filter((note) => note._id !== restored._id);
 
-        // Add back into items list
-        state.items.unshift(restored);
+        // 2️⃣ Add back to correct list
+        if (restored.isPinned) {
+          state.pinned.unshift(restored);
+        } else {
+          state.items.unshift(restored);
+        }
 
         toast.success("Note restored!");
       })
@@ -202,6 +207,19 @@ const notesSlice = createSlice({
       })
       .addCase(deleteNoteForever.rejected, (state, action: any) => {
         toast.error(action.payload || "Failed to delete note");
+      })
+      // soft delete note
+      .addCase(softDeleteNote.fulfilled, (state, action) => {
+        const deleted = action.payload;
+
+        // Remove from unpinned notes
+        state.items = state.items.filter((note) => note._id !== deleted._id);
+
+        // Remove from pinned notes (if present)
+        state.pinned = state.pinned.filter((note) => note._id !== deleted._id);
+
+        // Add to trash
+        state.trash.unshift(deleted);
       });
   },
 });
