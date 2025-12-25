@@ -1,6 +1,7 @@
 import React from "react";
 import { MdDelete, MdPushPin, MdArchive, MdUnarchive } from "react-icons/md";
 import { useAppDispatch } from "../app/hooks";
+import { openViewNote } from "../features/ui/uiSlice";
 import {
   updateNoteStatus,
   deleteNoteForever,
@@ -58,8 +59,21 @@ const NoteCard: React.FC<Props> = ({
     dispatch(deleteNoteForever(_id));
   };
 
+  const handleView = () => {
+    dispatch(
+      openViewNote({
+        _id,
+        title,
+        content,
+        isPinned,
+        isArchived,
+      } as any)
+    );
+  };
+
   return (
     <div
+      onClick={handleView}
       className="
       bg-white border border-gray-200 rounded-xl p-4
       shadow-sm hover:shadow-md 
@@ -70,7 +84,10 @@ const NoteCard: React.FC<Props> = ({
       {/* ------------------- PIN BUTTON ------------------- */}
       {mode !== "trash" && (
         <button
-          onClick={togglePin}
+          onClick={(e) => {
+            e.stopPropagation();
+            togglePin();
+          }}
           className="
           absolute top-2 right-2
           text-gray-500 hover:text-yellow-600
@@ -101,14 +118,20 @@ const NoteCard: React.FC<Props> = ({
         {mode === "trash" ? (
           <div className="w-full flex justify-between text-sm font-medium">
             <button
-              onClick={handleRestore}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRestore();
+              }}
               className="text-gray-600 hover:text-green-600 transition"
             >
               Restore
             </button>
 
             <button
-              onClick={handleDeleteForever}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteForever();
+              }}
               className="text-gray-600 hover:text-red-600 transition"
             >
               Delete Forever
@@ -118,7 +141,10 @@ const NoteCard: React.FC<Props> = ({
           <>
             {/* Archive / Unarchive */}
             <button
-              onClick={toggleArchive}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleArchive();
+              }}
               className="text-gray-500 hover:text-blue-600 transition"
             >
               {isArchived ? <MdUnarchive size={20} /> : <MdArchive size={20} />}
@@ -126,7 +152,10 @@ const NoteCard: React.FC<Props> = ({
 
             {/* Move to Trash (Soft Delete) */}
             <button
-              onClick={handleSoftDelete}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSoftDelete();
+              }}
               className="text-gray-500 hover:text-red-500"
             >
               <MdDelete size={20} />

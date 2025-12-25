@@ -156,3 +156,23 @@ export const softDeleteNote = createAsyncThunk(
     }
   }
 );
+
+export const updateNote = createAsyncThunk(
+  "notes/updateNote",
+  async (
+    {
+      noteId,
+      updates,
+    }: { noteId: string; updates: { title?: string; content?: string } },
+    { rejectWithValue }
+  ) => {
+    try {
+      const res = await notesApi.update(noteId, updates);
+      return res.data.data; // updated note
+    } catch (err: any) {
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to update note"
+      );
+    }
+  }
+);

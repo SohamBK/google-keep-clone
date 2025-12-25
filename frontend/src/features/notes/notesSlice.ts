@@ -9,6 +9,7 @@ import {
   deleteNoteForever,
   fetchPinnedNotes,
   softDeleteNote,
+  updateNote,
 } from "./notesThunks";
 import toast from "react-hot-toast";
 import { type Note } from "./types";
@@ -220,6 +221,26 @@ const notesSlice = createSlice({
 
         // Add to trash
         state.trash.unshift(deleted);
+      })
+
+      //update note cases
+      .addCase(updateNote.fulfilled, (state, action) => {
+        const updated = action.payload;
+
+        // Update in pinned
+        state.pinned = state.pinned.map((n) =>
+          n._id === updated._id ? updated : n
+        );
+
+        // Update in unpinned
+        state.items = state.items.map((n) =>
+          n._id === updated._id ? updated : n
+        );
+
+        // Update in trash (edge case)
+        state.trash = state.trash.map((n) =>
+          n._id === updated._id ? updated : n
+        );
       });
   },
 });

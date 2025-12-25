@@ -1,6 +1,7 @@
 import React from "react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
+import ViewNoteModal from "../components/NoteModal";
 
 interface Props {
   children: React.ReactNode;
@@ -23,6 +24,7 @@ const AppLayout: React.FC<Props> = ({ children }) => {
           "
         >
           {children}
+          <ViewNoteModal />
         </main>
       </div>
     </>
