@@ -10,6 +10,8 @@ import {
   fetchPinnedNotes,
   softDeleteNote,
   updateNote,
+  addNoteTags,
+  removeNoteTags,
 } from "./notesThunks";
 import toast from "react-hot-toast";
 import { type Note } from "./types";
@@ -58,6 +60,9 @@ const initialState: NotesState = {
   isLoading: false,
   error: null,
 };
+
+const updateEverywhere = (list: Note[], updated: Note) =>
+  list.map((n) => (n._id === updated._id ? updated : n));
 
 const notesSlice = createSlice({
   name: "notes",
@@ -241,6 +246,23 @@ const notesSlice = createSlice({
         state.trash = state.trash.map((n) =>
           n._id === updated._id ? updated : n
         );
+      })
+
+      // Add and Remove Note Tags
+      .addCase(addNoteTags.fulfilled, (state, action) => {
+        const updated = action.payload;
+
+        state.pinned = updateEverywhere(state.pinned, updated);
+        state.items = updateEverywhere(state.items, updated);
+        state.trash = updateEverywhere(state.trash, updated);
+      })
+
+      .addCase(removeNoteTags.fulfilled, (state, action) => {
+        const updated = action.payload;
+
+        state.pinned = updateEverywhere(state.pinned, updated);
+        state.items = updateEverywhere(state.items, updated);
+        state.trash = updateEverywhere(state.trash, updated);
       });
   },
 });

@@ -26,4 +26,12 @@ export const notesApi = {
 
   update: (id: string, updates: { title?: string; content?: string }) =>
     axiosClient.put(`/note/${id}`, updates),
+
+  addTags: (noteId: string, tags: string[]) =>
+    axiosClient.patch(`/note/${noteId}/tags`, { tags }),
+
+  removeTags: (noteId: string, tags: string[]) =>
+    axiosClient.delete(`/note/${noteId}/tags`, {
+      data: { tags },
+    }),
 };

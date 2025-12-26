@@ -13,6 +13,7 @@ interface Props {
   _id: string;
   title?: string;
   content: string;
+  tags: string[];
   isPinned: boolean;
   isArchived: boolean;
   mode?: "normal" | "archive" | "trash";
@@ -22,6 +23,7 @@ const NoteCard: React.FC<Props> = ({
   _id,
   title,
   content,
+  tags,
   isPinned,
   isArchived,
   mode = "normal",
@@ -110,6 +112,24 @@ const NoteCard: React.FC<Props> = ({
         </p>
       ) : (
         <p className="text-gray-500">No content available</p>
+      )}
+
+      {/*------------------- Labels -------------------*/}
+      {tags.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {tags.map((tag) => (
+            <span
+              key={tag}
+              className="
+          text-xs px-2 py-0.5
+          bg-gray-100 text-gray-700
+          rounded-full
+        "
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
       )}
 
       {/* ------------------- ACTIONS ------------------- */}

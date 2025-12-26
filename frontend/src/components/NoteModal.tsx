@@ -3,6 +3,7 @@ import { MdClose } from "react-icons/md";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { closeViewNote } from "../features/ui/uiSlice";
 import { updateNote } from "../features/notes/notesThunks";
+import { addNoteTags, removeNoteTags } from "../features/notes/notesThunks";
 
 const NoteModal: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -10,6 +11,7 @@ const NoteModal: React.FC = () => {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [tagInput, setTagInput] = useState("");
 
   // Populate local state on open
   useEffect(() => {
@@ -75,6 +77,55 @@ const NoteModal: React.FC = () => {
             text-gray-700 bg-transparent
           "
         />
+
+        {/* Tags Section */}
+        <input
+          value={tagInput}
+          onChange={(e) => setTagInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && tagInput.trim()) {
+              dispatch(
+                addNoteTags({
+                  noteId: note._id,
+                  tags: [tagInput.trim()],
+                })
+              );
+              setTagInput("");
+            }
+          }}
+          placeholder="Add label"
+          className="
+            mt-3 w-full text-sm
+            outline-none border-none
+            bg-transparent
+            text-gray-600
+          "
+        />
+
+        {note.tags?.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-4">
+            {note.tags?.map((tag) => (
+              <span
+                key={tag}
+                className="
+          flex items-center gap-1
+          text-xs px-2 py-0.5
+          bg-gray-100 rounded-full
+        "
+              >
+                {tag}
+                <button
+                  onClick={() =>
+                    dispatch(removeNoteTags({ noteId: note._id, tags: [tag] }))
+                  }
+                  className="text-gray-500 hover:text-red-500"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

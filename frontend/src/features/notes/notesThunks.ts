@@ -176,3 +176,33 @@ export const updateNote = createAsyncThunk(
     }
   }
 );
+
+export const addNoteTags = createAsyncThunk(
+  "notes/addTags",
+  async (
+    { noteId, tags }: { noteId: string; tags: string[] },
+    { rejectWithValue }
+  ) => {
+    try {
+      const res = await notesApi.addTags(noteId, tags);
+      return res.data.data;
+    } catch {
+      return rejectWithValue("Failed to add tags");
+    }
+  }
+);
+
+export const removeNoteTags = createAsyncThunk(
+  "notes/removeTags",
+  async (
+    { noteId, tags }: { noteId: string; tags: string[] },
+    { rejectWithValue }
+  ) => {
+    try {
+      const res = await notesApi.removeTags(noteId, tags);
+      return res.data.data;
+    } catch {
+      return rejectWithValue("Failed to remove tags");
+    }
+  }
+);
