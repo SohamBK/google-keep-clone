@@ -67,6 +67,7 @@ const NoteCard: React.FC<Props> = ({
         _id,
         title,
         content,
+        tags,
         isPinned,
         isArchived,
       } as any)
