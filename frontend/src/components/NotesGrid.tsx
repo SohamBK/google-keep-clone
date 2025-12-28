@@ -14,17 +14,44 @@ const NotesGrid: React.FC<NotesGridProps> = ({
   showSections = true,
   mode = "normal",
 }) => {
-  const storeNotes = useAppSelector((state) => state.notes.items);
-
-  // If notes prop exists → use it
-  // If not → use store notes
-  const allNotes = notes ?? storeNotes;
-
-  // Filter notes
+  // Core notes state
   const pinned = useAppSelector((state) => state.notes.pinned);
   const others = useAppSelector((state) => state.notes.items);
 
-  // ARCHIVE PAGE: no sections
+  // Search state
+  const searchResults = useAppSelector((state) => state.notes.searchResults);
+
+  // If notes prop exists → use it (archive / trash pages)
+  const allNotes = notes ?? others;
+
+  const isSearchActive = searchResults.length > 0;
+
+  /* ======================================================
+     SEARCH MODE (overrides everything else)
+     ====================================================== */
+  if (isSearchActive) {
+    return (
+      <div className="max-w-6xl mx-auto mt-8 px-4">
+        <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4">
+          {searchResults.map((note) => (
+            <div key={note._id} className="mb-4">
+              <NoteCard {...note} />
+            </div>
+          ))}
+        </div>
+
+        {searchResults.length === 0 && (
+          <div className="text-center text-gray-500 mt-20 text-lg">
+            No notes found.
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  /* ======================================================
+     ARCHIVE / TRASH PAGES (no pinned/others sections)
+     ====================================================== */
   if (!showSections) {
     return (
       <div className="max-w-6xl mx-auto mt-8 px-4 columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4">
@@ -33,11 +60,19 @@ const NotesGrid: React.FC<NotesGridProps> = ({
             <NoteCard {...note} mode={mode} />
           </div>
         ))}
+
+        {allNotes.length === 0 && (
+          <div className="text-center text-gray-500 mt-20 text-lg">
+            No notes available.
+          </div>
+        )}
       </div>
     );
   }
 
-  // DASHBOARD PAGE (default: show pinned + others)
+  /* ======================================================
+     DASHBOARD PAGE (Pinned + Others)
+     ====================================================== */
   return (
     <div className="max-w-6xl mx-auto mt-8 px-4">
       {/* ------------------- PINNED NOTES ------------------- */}

@@ -12,6 +12,7 @@ import {
   updateNote,
   addNoteTags,
   removeNoteTags,
+  searchNotes,
 } from "./notesThunks";
 import toast from "react-hot-toast";
 import { type Note } from "./types";
@@ -23,6 +24,11 @@ interface NotesState {
   page: number;
   totalPages: number;
   hasNextPage: boolean;
+
+  // search notes
+  searchResults: Note[];
+  isSearching: boolean;
+  searchError: string | null;
 
   // archived notes pagination
   archivePage: number;
@@ -52,6 +58,10 @@ const initialState: NotesState = {
   archiveTotalPages: 1,
   archiveHasNextPage: false,
 
+  searchResults: [],
+  isSearching: false,
+  searchError: null,
+
   trash: [],
   trashPage: 1,
   trashTotalPages: 1,
@@ -67,7 +77,13 @@ const updateEverywhere = (list: Note[], updated: Note) =>
 const notesSlice = createSlice({
   name: "notes",
   initialState,
-  reducers: {},
+  reducers: {
+    clearSearchResults(state) {
+      state.searchResults = [];
+      state.isSearching = false;
+      state.searchError = null;
+    },
+  },
   extraReducers: (builder) => {
     builder
       // Create Note
@@ -263,8 +279,23 @@ const notesSlice = createSlice({
         state.pinned = updateEverywhere(state.pinned, updated);
         state.items = updateEverywhere(state.items, updated);
         state.trash = updateEverywhere(state.trash, updated);
+      })
+
+      // Search Notes
+      .addCase(searchNotes.pending, (state) => {
+        state.isSearching = true;
+        state.searchError = null;
+      })
+      .addCase(searchNotes.fulfilled, (state, action) => {
+        state.isSearching = false;
+        state.searchResults = action.payload;
+      })
+      .addCase(searchNotes.rejected, (state, action: any) => {
+        state.isSearching = false;
+        state.searchError = action.payload;
       });
   },
 });
 
 export default notesSlice.reducer;
+export const { clearSearchResults } = notesSlice.actions;

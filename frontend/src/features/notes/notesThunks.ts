@@ -206,3 +206,17 @@ export const removeNoteTags = createAsyncThunk(
     }
   }
 );
+
+export const searchNotes = createAsyncThunk(
+  "note/search",
+  async (query: string, { rejectWithValue }) => {
+    try {
+      const res = await notesApi.searchNotes(query);
+      return res.data.data;
+    } catch (err: any) {
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to search notes"
+      );
+    }
+  }
+);

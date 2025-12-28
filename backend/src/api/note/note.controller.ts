@@ -701,3 +701,35 @@ export const permanentlyDeleteNote = async (req: Request, res: Response) => {
     return sendError(res, "Failed to permanently delete note.", 500);
   }
 };
+
+// API for searching notes by title or content and tags
+export const searchNotes = async (req: Request, res: Response) => {
+  try {
+    const { q } = req.query;
+
+    if (!q || typeof q !== "string") {
+      return res.status(400).json({
+        success: false,
+        message: "Search query is required",
+      });
+    }
+
+    const regex = new RegExp(q, "i"); // case-insensitive
+
+    const notes = await Note.find({
+      isDeleted: false, // ignore trash
+      $or: [{ title: regex }, { content: regex }, { tags: { $in: [regex] } }],
+    }).sort({ isPinned: -1, updatedAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      data: notes,
+    });
+  } catch (error) {
+    console.error("Search error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while searching notes",
+    });
+  }
+};

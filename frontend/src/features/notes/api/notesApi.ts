@@ -1,3 +1,4 @@
+import { BiSearch } from "react-icons/bi";
 import axiosClient from "../../../api/axiosClient";
 
 export const notesApi = {
@@ -34,4 +35,6 @@ export const notesApi = {
     axiosClient.delete(`/note/${noteId}/tags`, {
       data: { tags },
     }),
+
+  searchNotes: (query: string) => axiosClient.get(`/note/search?q=${query}`),
 };

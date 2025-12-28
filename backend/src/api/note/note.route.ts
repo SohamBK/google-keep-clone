@@ -16,6 +16,7 @@ import {
   getAllTrashNotes,
   restoreNoteFromTrash,
   permanentlyDeleteNote,
+  searchNotes,
 } from "./note.controller";
 import {
   validateCreateNote,
@@ -34,6 +35,7 @@ notesRouter.get("/", authMiddleware, getAllNotes);
 notesRouter.get("/pinned", authMiddleware, getAllPinnedNotes);
 notesRouter.get("/archived", authMiddleware, getAllArchivedNotes);
 notesRouter.get("/trash", authMiddleware, getAllTrashNotes);
+notesRouter.get("/search", authMiddleware, searchNotes);
 notesRouter.get("/:id", authMiddleware, getNoteById);
 notesRouter.put("/:id", authMiddleware, validateUpdateNote, updateNote);
 notesRouter.delete("/:id", authMiddleware, moveNoteToTrash);
